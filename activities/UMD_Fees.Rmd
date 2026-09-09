@@ -33,7 +33,7 @@ umd_fees_pct <- umd_fees |> mutate(pct_change = (`Fall 2026`- `Fall 2021`)/`Fall
 
 Write a few sentences about what you found in those percentages. What's the story here? What questions do you have?
 
-
+The main numbers that stick out to me are the percentage change from Fall 2021 to Fall 2026 in UMD's athletics, shuttle bus, sustainability and fees. The university's student sustainability fees have increased by 150% over the past five years, the largest increase by far out of any of the student fees categories. What accounts for this massive increase? How are the sustainability fees students pay for benefiting their experience at UMD? I have the same question about the percentage change in UMD's shuttle bus fees, which have increased by about nearly 60% since 2021. I know the university has recently invested in some electric shuttle buses, but has the shuttle bus experience seriously improved for students over the years in a way that is meaningful? I am also surprised that the university's athletics fees have not increased at all. I would have expected them to increase given UMD's Big 10 title and emphasis on its sports teams, but maybe that money is coming from somewhere else, such as outside donors. Finally, why did the student counseling center fees suddenly jump from 0 dollars to 15 dollars from Fall 2021 to Fall 2022, and why has it since risen to 52 dollars?
 
 
 When you are done, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
