@@ -9,6 +9,7 @@ In this assignment, we will be working with a dataset containing information abo
 You will need to load the tidyverse library
 
 ```{r}
+library(tidyverse)
 ```
 
 Then you'll load the data from the web. The URL for the data is: https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/white_house_salaries_2026.csv. You will create a dataframe called `wh_salaries` that contains the data from this URL.
@@ -16,19 +17,20 @@ Then you'll load the data from the web. The URL for the data is: https://raw.git
 ### Task 2: Load the Data and Describe It
 
 ```{r}
+wh_salaries <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/white_house_salaries_2026.csv")
 ```
 ### Task 3: Describe the Data
 
 You should examine that dataframe carefully by clicking on it in the Environment tab in RStudio. Write a couple of sentences describing the categories of incidents. From a reporting standpoint, what stands out to you about this data? Are there any salary values that will cause problems for analysis?
 
-ANSWER HERE
+After examining the data, there are three main categories of incidents that stick out to me. There are white house employees who make six figures a year, and they all seem to be some kind of special assistant to the president or senior adviser. Then there are employees who make five figures annually, whose positions range from directors to lower-level advisers to staff assistants. Finally, there are a few employees whose salary values amount to 0. I would imagine that value would cause problems for analysis because 0 is so far from all the other values, plus it would make it difficult to calculate percentage changes.       
 
 ### Task 4: Calculate the Mean and Median of the Salaries
 
 Write code to calculate the mean and median of the salaries in the dataset using the `summarize()` function. You don't need to make a new dataframe, just display the results.
 
 ```{r}
-
+wh_salaries |> summarize(mean_salary = mean(`SALARY`), median_salary = median(`SALARY`))
 ```
 
 ### Task 5: Add in the minimum and maximum salaries
@@ -36,17 +38,17 @@ Write code to calculate the mean and median of the salaries in the dataset using
 Take the code you just wrote and add in the minimum and maximum salaries (the functions for that are `min()` and `max()`). Your results should show four columns: mean_salary, median_salary, min_salary, max_salary.
 
 ```{r}
-
+wh_salaries |> summarize(mean_salary = mean(`SALARY`), median_salary = median(`SALARY`), min_salary = min(`SALARY`), max_salary = max(`SALARY`))
 ```
 
 ### Task 6: Describe the Results
 
 Write a couple of sentences describing the results of your analysis. What do the mean and median salaries tell you about the data? What do the minimum and maximum salaries tell you? Are there any outliers in the data?
 
-ANSWER HERE
+The mean salary value is larger than the median, which indicates this dataset is positively skewed by a few especially large salaries. The middle value of the data is more represented by the median. The minimum and maximum salary values give me a good idea of this dataset's range, which is quite large. There are some white house employees who make nothing, meanwhile there is one that makes $197,200. Both of these numbers are outliers, as are some of the other higher-salary values close to $197,200.  
 
 ### Task 7: Story Idea
 
 Based on the data, what is your best story idea? What is the next step you would take to develop that story idea?
 
-ANSWER HERE
+I want to know more about the white house employees who are not making any money. Why are some employee salaries $0, while there is someone out there making almost $200,000 a year? What specific aspects of their jobs warrant such a drastic salary difference? My story would examine these questions and also detail the work that those making no money do each day. Perhaps their work does actually demand a salary. To develop this story idea, I would first look into the job descriptions of the white employees making no salary. I would also examine the role of the $197,200-salary employee to compare. To help inform my reporting, I would probably reach out to some current and/or former white house employees, a white house spokesperson and experts in the government & politics field. 
