@@ -62,3 +62,15 @@ The coastal city had the second highest violent crime rate in 2019, the highest 
 ### Task 9: Save Your Work and Put it on GitHub
 
 Save this notebook, then commit it to your local repository. Push the changes to your GitHub repository and submit the URL for this file in ELMS.
+
+### Task 10: HW 5
+
+```{r}
+md_cities_percentiles <- md_cities_rates |> mutate(percentile = ntile(violent_rate_2020, 100))
+```
+There are 10 cities above the 90th percentile. 
+
+```{r}
+
+```
+
