@@ -71,6 +71,8 @@ md_cities_percentiles <- md_cities_rates |> mutate(percentile = ntile(violent_ra
 There are 10 cities above the 90th percentile. 
 
 ```{r}
-
+md_cities_percentiles |> 
+  summarize(violent_2020_IQR = IQR(violent_rate_2020)
+)
 ```
-
+The interquartile range of the 2020 violent crime rate is about 42 crimes per 10,000 people. I do not think this change's the results of my story idea from the previous assignment, as my story deals with high crime rates in Ocean City, while the IQR reveals information about the middle 50% of the dataset and its spread. 
