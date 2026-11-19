@@ -32,8 +32,7 @@ schools |> arrange(`FARMS Pct`) |> head(10)
 
 Look at the distribution of FARMS percentages. Do any values look unusual or suspicious? What might it mean if a school has a FARMS percentage of exactly 100? Write two or three sentences describing what you see and whether anything concerns you.
 
-ANSWER HERE
-
+I am surprised that so many schools have a FARMS percentage of 100. That would mean that every student at the school is on a free and reduced-price meal plan. Perhaps the school is located in a lower-income community and has a partnership with FARMS that mandates students to receive free and reduced-price meals. Or, maybe those schools just give every student free lunch, prompting them to report that everyone is on FARMS (even though that is not actually measuring the same thing). Something suspicious that sticks out to me is the gap between schools with 100% of students on FARMS and the next percentage level. The next highest percentage after 100 is 53.9%, which is a big drop. That means no schools reported a percentage between 54-100, which seems unusual and further leads me to believe that the data reported by 100% FARMS schools is inaccurate or not totally reflective of the actual situation.  
 
 ### Task 2: Create a Scatterplot and Describe the Results
 
@@ -50,7 +49,9 @@ schools |>
 
 Describe what you see. Is there a clear trend? Does the regression line look like it represents the data well, or does it seem to be pulled in an odd direction? Connect what you observed in Task 1 to what you see here.
 
-ANSWER HERE
+I do not see a clear trend here, and the regression line does not look like it fits the data very well at all. Most of the points are scattered in a non-linear blob near the lower end of the spectrum, and then we can see the 100% outlying data points pulling the line to the right. Also, the math scores for schools with a 100% FARMS value vary greatly. Some schools reported expected math expectations close to 80%, while others reported below 60%. The schools with a lower number of students on FARMS are also scattered all over the place when it comes to expected math scores.
+
+This scatterplot is a visual representation of how unusual the 100% values are. They are huge outliers compared to the rest of the data points, and there is not even a traceable trend between math test scores among those schools. 
 
 
 ### Task 3: Run the Regression Model
@@ -58,8 +59,8 @@ ANSWER HERE
 Let's build the linear regression model using all schools.
 
 ```{r}
-model <- lm(`% Met or Exceeded Math Expectations` ~ `FARMS Pct`, data = schools)
-summary(model)
+farms_model <- lm(`% Met or Exceeded Math Expectations` ~ `FARMS Pct`, data = schools)
+summary(farms_model)
 ```
 
 There are three things to examine: the p-value, the Adjusted R-squared, and the coefficient for FARMS Pct.
@@ -68,7 +69,13 @@ The **p-value** tells you whether the relationship is statistically significant.
 
 Report all three values and describe what they tell you. Does this model support the school board member's claim? Is this even a model worth using?
 
-ANSWER HERE
+P-value: 0.12. This value is higher than the significance level of 0.05 that we use to determine statistical significance, meaning the relationship between FARMS percent and expected math scores is not statistically significant. We could get these same results due to random chance. 
+
+Adjusted R-squared: 0.025, or 2.5%. This tells me that knowing the FARMS percent of a school explains about 2.5% of the variation in expected math scores. The rest of the variation, nearly 98% of it, is instead explained/influenced by other factors.
+
+Coefficient: 0.12. This means that as FARMS percentages go up, so do math percentages. However, this value is still extremely small. It basically means that when a school's FARMS value goes up 1%, its expected reading scores only increase by 0.12%.
+
+Overall, this model does not support the school board member's claim that elementary schools with fewer students on free and reduced-price meals do better on standardized math tests. Still, this model is worth at least examining in order to rule out FARMS' influence on math test scores. It allows us to instead study other potential factors to see if they play more of a role in test scores. 
 
 
 ### Task 4: What's Driving the Problem? Filter and Rerun.
@@ -78,27 +85,29 @@ In Task 1, you likely spotted schools with a FARMS percentage of 100. Those valu
 ```{r}
 schools_filtered <- schools |> filter(`FARMS Pct` < 100)
 
-model_filtered <- lm(`% Met or Exceeded Math Expectations` ~ `FARMS Pct`, data = schools_filtered)
-summary(model_filtered)
+farms_model_filtered <- lm(`% Met or Exceeded Math Expectations` ~ `FARMS Pct`, data = schools_filtered)
+summary(farms_model_filtered)
 ```
 
 Now compare the two models side by side:
 
 ```{r}
 cat("Full dataset model:\n")
-cat("  Coefficient:", coef(model)[2], "\n")
-cat("  p-value:", summary(model)$coefficients[2,4], "\n")
-cat("  Adjusted R-squared:", summary(model)$adj.r.squared, "\n\n")
+cat("  Coefficient:", coef(farms_model)[2], "\n")
+cat("  p-value:", summary(farms_model)$coefficients[2,4], "\n")
+cat("  Adjusted R-squared:", summary(farms_model)$adj.r.squared, "\n\n")
 
 cat("Filtered dataset model (FARMS < 100):\n")
-cat("  Coefficient:", coef(model_filtered)[2], "\n")
-cat("  p-value:", summary(model_filtered)$coefficients[2,4], "\n")
-cat("  Adjusted R-squared:", summary(model_filtered)$adj.r.squared, "\n")
+cat("  Coefficient:", coef(farms_model_filtered)[2], "\n")
+cat("  p-value:", summary(farms_model_filtered)$coefficients[2,4], "\n")
+cat("  Adjusted R-squared:", summary(farms_model_filtered)$adj.r.squared, "\n")
 ```
 
 How did removing those schools change the model? Did the coefficient change direction? Did the p-value or R-squared improve meaningfully? What does this tell you about the influence of suspicious data values on a regression model?
 
-ANSWER HERE
+The coefficient direction did not change, meaning there is still a positive relationship between FARMS percentages and math test scores. However, it did get a bit larger, as did the adjusted R-squared value, which suggests that FARMS percentages explain a bit more of the variation in test scores than we originally thought after adjusting for the outlier 100% FARMS schools. Math test scores also increase more with every 1% increase in FARMS figures. Finally, at 0.04, the P-value has dropped to just below the significance level of 0.05, which now makes these findings statistically significant. Not extremely statistically significant, as 0.04 is very close to 0.05, but this new model is at least more meaningful than the first one. 
+
+These differences tell me that the suspicious data values had a misleading influence on the regression model, pulling it in an odd direction and making the findings appear less significant than they actually are. However, even after taking out the 100% schools, FARMS percentages still do not account for a huge portion of the variation in math test scores.
 
 
 ### Task 5: Even the Better Model Has Problems
@@ -121,7 +130,7 @@ With a low R-squared, the residuals from this model aren't very meaningful as la
 ```{r}
 schools_filtered <- schools_filtered |>
   mutate(
-    predicted = predict(model_filtered),
+    predicted = predict(farms_model_filtered),
     residual = `% Met or Exceeded Math Expectations` - predicted,
     abs_residual = abs(residual)
   ) |>
@@ -132,8 +141,7 @@ head(schools_filtered |> select(1, `FARMS Pct`, `% Met or Exceeded Math Expectat
 
 What are the largest residuals? Given the model's weak R-squared, how much confidence would you have in labeling these schools as over- or under-performers? Why?
 
-ANSWER HERE
-
+The schools with the largest residuals are Gulph Elementary School (-36.65), Hereford Elementary School (-32.53) and Whitemarsh Elementary School (-30.80). However, given the model's weak R-squared, I would still be hesitant to label these schools as under-performers, just as I would be hesitant to label the schools with positive residuals over-performers. A weak R-squared means that the model actually does not explain much of the variation in math test scores, so the models "predicted" values may not match up with how well a school's student body is actually expected to perform on math testing.  
 
 ### Task 6: Write the Story Pitch
 
@@ -141,4 +149,4 @@ You've now run two models, examined the data quality and seen that even a cleane
 
 Write a short story pitch (3-5 sentences) that addresses the following: Does the data support or contradict the claim? What data quality issues did you find? What would you need - different data, a different model, additional reporting - before you could responsibly publish a story about this claim? Who would you call first?
 
-ANSWER HERE
+I am interested in writing a story that explores the relationship between schools' FARMS percentages and how well students do on standardized math tests. However, I already know that the school board member's claim stating schools with fewer students on free and reduced-price meals do better on math tests is not supported by the data, because the model has a weak R-squared that suggests its does not explain much of the variation in test scores. Also, the coefficient of the relationship is very small, which means the relationship between the two variables is very small. The model's lack of fit is the main data quality issue, but other issues include the size of the sample--as there are only a few schools in the dataset--and other potential test score factors that are not mentioned. Many things besides FARM percentages could affect how well students do on standardized math testing, such as average school class size, community income level, accessibility to tutors, and more. Furthermore, the misleading impact of the schools that reported 100% of students on FARMS makes me want to call up these schools and ask how they got the numbers for FARM percentages. I would defintely call schools first, and ask them questions about students' average income levels, class sizes, etc. in addition to questions related to FARMS.   
