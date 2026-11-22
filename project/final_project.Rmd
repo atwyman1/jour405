@@ -5,8 +5,91 @@ output: html_document
 
 ```{r}
 library(tidyverse)
-movies_data <- read_csv("https://raw.githubusercontent.com/atwyman1/jour405/refs/heads/main/project/recent_movies_2024_2026.csv")
+IMDB_movies_data <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/movies_since_2024.csv") |> filter(!is.na(runtimeMinutes), !is.na(averageRating))
 ```
+
+#Filtering 
+
+I used the filter function you taught us in class with the SoccerFouls activity to filter out any NA inputs found in the runtimeMinutes and averageRating variables. That brought the number of films in the dataset down from 61,834 to 26,829, which is already a much more feasible number to work with.   
+# Trial and error testing 
+
+# Runtime summary statistics
+
+```{r}
+summary(IMDB_movies_data$runtimeMinutes)
+sd(IMDB_movies_data$runtimeMinutes)
+
+```
+The mean movie runtime for this dataset is 98.33 minutes. The median runtime is 95, and the standard deviation is 29.22 minutes. These all seem like normal values for movie length. However, I was surprised to see that the minimum movie runtime is 7 minutes, and the maximum is 2,000 minutes. These both seem like pretty extreme values. After looking at the dataset, I discovered that the 7-minute movie is called "Firsts," a short comedy film released in 2025. I didn't account for this dataset to include short films, but I guess it makes sense, and it might be an interesting feature to examine in my larger analysis of the relationship between movie runtime and audience rating. The 2,000 minute movie in this dataset is a 2025 documentary called "The Freedom of Uselessness." Again, I did not think about the fact that documentaries could be included in this dataset. I am not sure if I want to leave documentaries in once I get to testing my hypothesis. Documentaries might be too different from traditional films and therefore might warrant their own separate analysis. 
+
+# Audience rating summary statistics
+
+```{r}
+summary(IMDB_movies_data$averageRating)
+sd(IMDB_movies_data$averageRating)
+```
+The mean rating for movies in this dataset is 6.31, the median is 6.4 and the standard deviation is 1.57. The minimum rating is 1. Wow. I had to see which movie this was. Looking at the data, I found it to be "Prazdnik," drama and war movie from 2024. This also a Russian film. I wonder if it is fair to include international films in my analysis, or if it would make more sense to filter them out and narrow down the number of movies I am examining. However, I am unsure how I would do this, since there is no category in the dataset for "langauge" "country" or something similar. Several other movies also received a rating of 1. The maximum rating in this dataset is 10. Again, I was very intrigued to see which movie received such a high rating. I discovered it was the 2025 documentary "I'm Only Blind," along with many others. 
+
+# Scatterplot
+
+```{r}
+IMDB_movies_data |> 
+  ggplot() +
+  geom_point(aes(x=runtimeMinutes, y=averageRating)) +
+  geom_smooth(aes(x=runtimeMinutes, y=averageRating), method="lm")
+```
+
+Based on this scatterplot's line of best fit, there seems be a positive relationship between movie runtime and audience rating. However, it is very difficult to tell much about the relationship beyond that, because all of the datapoints are clumped on the left side of the graph, and there are so many of them. I think I need to narrow down the number of movies I include in my analysis based on some parameters. As suggested in the feedback on my last assignment, I think I am going to try filtering out movies that have vote counts below 1,000, and that's just to start. Films with lower vote counts might be less stable and therefore misleading when it comes to my analysis. I am also thinking about excluding movies that run longer than 300 minutes from my analysis, since there are so few of them and they are such outliers. 
+
+# Filter data
+
+```{r}
+IMDB_filtered <- IMDB_movies_data |> filter(numVotes >= 1000, runtimeMinutes <= 300)
+```
+
+I created a new filtered dataset using the formula we went over in our math scores regression activity in class. I filtered the data so that only films with more than 1,000 vote counts that run less than 300 minutes long are included. This cut the number of movies down from 26,829 to 3,797, a huge difference. Hopefully, it is easier to see trends now.
+
+# Filtered summary statistics
+
+```{r}
+summary(IMDB_filtered$runtimeMinutes)
+sd(IMDB_filtered$runtimeMinutes)
+
+summary(IMDB_filtered$averageRating)
+sd(IMDB_filtered$averageRating)
+```
+# Filtered scatterplot
+
+```{r}
+IMDB_filtered |> 
+  ggplot() +
+  geom_point(aes(x=runtimeMinutes, y=averageRating)) +
+  geom_smooth(aes(x=runtimeMinutes, y=averageRating), method="lm") +
+  labs(x = "Average Rating", y = "Movie Runtime, Minutes",
+       title = "Movie Rating vs. Movie Runtime, 2024-26 Films")
+```
+This is a much clearer scatterplot than before. I can see that there is still a positive relationship between movie runtime and audience rating, but it is very, very slight. There does not seem to be much correlation at all, as all of the datapoints are clumped together in a circle, rather than a clean diagonal line. The slope of the fit line is also very small. 
+
+# Correlation test 
+
+```{r}
+IMDB_filtered |> summarize(correlation = cor(averageRating, runtimeMinutes, method="pearson"))
+```
+
+This correlation coefficient, 0.24, matches up with what I gathered from the earlier scatterplot. There is a weak positive correlation between movie runtime and audience rating, as 0.24 is much closer to 0, or no correlation, than 1 or -1, or perfect correlation. Based on these findings, I am not confident that I can reject my null hypothesis, which in this case would be that there is no meaningful relationship between movie runtime and audience rating.
+
+
+# Simple regression analysis
+
+```{r}
+movies_model <- lm(averageRating ~ runtimeMinutes, data = IMDB_filtered)
+summary(movies_model)
+```
+The p-value is less than 0.05, which actually means I can reject the null hypothesis after all, because the relationship is statistically significant. Therefore, we can rule out that there is no relationship between movie runtime and audience rating. However, given the correlation coefficient from above, we still know that this relationship is weak. 
+
+The multiple R-squared value is 0.058, meaning that knowing a movie's runtime explains about 5.8% of the variation in expected audience rating. The rest of the variation (most of it in this case) is due to the influence of other factors, potentially things like movie genre, cast, director, etc.
+
+The coefficient value is 0.012. Because this value is positive, it means that as runtimes increase, so movie ratings. However, this value is still extremely small. It tells me that when a movie's runtime increases by 1 minute, its expected audience rating only goes up 0.012%.
 
 # Possible tests
 
